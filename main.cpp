@@ -1,12 +1,3 @@
-/*#include<stdio.h>
-#include<stdlib.h>
-
-int main(){
-    printf("Hello World!\n");
-    return(0);
-}*/
-
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
