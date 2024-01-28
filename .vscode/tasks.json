@@ -6,6 +6,9 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
+                "-fsanitize=address",
+                "-Wall",
+                "-Wextra",
                 "-g",
                 "${file}",
                 "-o",
