@@ -84,5 +84,6 @@ int main() {
         return EXIT_FAILURE;
     }
 
+    std::cout << "success end" << std::endl;
     return EXIT_SUCCESS;
 }
