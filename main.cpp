@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <chrono>
 #include <cstdint>
+#include <unistd.h>
+
+#define time_ns() std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -55,7 +58,7 @@ private:
     }
 
     void mainLoop() {
-        uint64_t start_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        uint64_t start_time = time_ns();
         printf("current_time %ld\n", start_time);
         uint64_t i = 0;
         while (!glfwWindowShouldClose(window)) {
@@ -64,7 +67,7 @@ private:
             glfwPollEvents();
             drawFrame();
         }
-        uint64_t end_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        uint64_t end_time = time_ns();
         float delta_time = (float)(end_time - start_time);
         printf("nanoseconds: %f\n", delta_time);
         delta_time = delta_time/1000000000;
