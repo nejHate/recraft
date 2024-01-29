@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <chrono>
+#include <cstdint>
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -53,9 +55,25 @@ private:
     }
 
     void mainLoop() {
+        uint64_t start_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        printf("current_time %ld\n", start_time);
+        uint64_t i = 0;
         while (!glfwWindowShouldClose(window)) {
+            i++;
+            //printf("%ld\n", ++i);
             glfwPollEvents();
+            drawFrame();
         }
+        uint64_t end_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        float delta_time = (float)(end_time - start_time);
+        printf("nanoseconds: %f\n", delta_time);
+        delta_time = delta_time/1000000000;
+        printf("seconds: %f\n", delta_time);
+        printf("fps: %f\n", (float)(i / delta_time));
+    }
+
+    void drawFrame() {
+        // TODO
     }
 
     void cleanup() {
@@ -78,3 +96,9 @@ int main() {
     std::cout << "success end" << std::endl;
     return EXIT_SUCCESS;
 }
+
+
+//sudo apt install linux-tools-6.5.0-15-generic
+//sudo apt install linux-cloud-tools-6.5.0-15-generic
+//dont install linux-nvidia-6.2-tools-common
+
