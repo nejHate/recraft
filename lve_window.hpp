@@ -13,11 +13,8 @@ namespace lve{
       LveWindow(int w, int h, std::string name);
       ~LveWindow();
 
-<<<<<<< HEAD
       bool shouldClose() { return glfwWindowShouldClose(window); }    
 
-=======
->>>>>>> 9db83ae6a3e1fec4bdd877fb0ba5338e6021debd
     private:
       void initWindow();
 
