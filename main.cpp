@@ -1,4 +1,28 @@
-#define GLFW_INCLUDE_VULKAN
+#include "first_app.hpp"
+
+
+#include <cstdlib>
+#include <iostream>
+#include <stdexcept>
+
+
+int main(){
+
+  lve::FirstApp app{};
+
+  try {
+    app.run();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() <<std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
+}
+
+
+
+
+/*#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -98,10 +122,18 @@ int main() {
 
     std::cout << "success end" << std::endl;
     return EXIT_SUCCESS;
-}
+}*/
 
 
 //sudo apt install linux-tools-6.5.0-15-generic
 //sudo apt install linux-cloud-tools-6.5.0-15-generic
 //dont install linux-nvidia-6.2-tools-common
 
+/*
+  sudo apt install vulkan-tools
+  sudo apt install libvulkan-dev
+  sudo apt install vulkan-validationlayers-dev spirv-tools
+  sudo apt install libglfw3-dev
+  sudo apt install libglm-dev
+  sudo apt install cmake
+*/
