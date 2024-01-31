@@ -2,18 +2,18 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: g++ build active file",
+            "label": "C/C++: gcc build active file",
             "command": "/usr/bin/g++",
             "args": [
                 "-fdiagnostics-color=always",
+                "-Wall",
+                "-Wextra",
                 "-g",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "display_opengl/display.cpp",
-                "-lGL",
-                "-lGLEW",
-                "-lSDL2"
+                "-lglfw",
+                "-lvulkan"
             ],
             "options": {
                 "cwd": "${fileDirname}"
