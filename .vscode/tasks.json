@@ -11,6 +11,7 @@
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
                 "display_opengl/display.cpp",
+                "display_opengl/shader.cpp",
                 "-lGL",
                 "-lGLEW",
                 "-lSDL2"
