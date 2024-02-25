@@ -40,6 +40,7 @@ struct chunk{
         if(left != nullptr){
             left->right = this;
         }
+        std::cout << "allocate chunk" << std::endl;
     }
 };
 
@@ -47,11 +48,12 @@ int main(){
     chunk *loadded_chunk[10];
     for (int i = 0; i < 10; i++){
         loadded_chunk[i] = new chunk(nullptr, nullptr, nullptr, nullptr);
+        std::cout << "allocatig: " << i << std::endl;
     }
     for (int i = 0; i < 10; i++){
         delete loadded_chunk[i];
     }
     //std::cout << loadded_chunk[0].x << std::endl;
     //std::cout << loadded_chunk[0].y << std::endl;
-    std::cout << "END OF PROGRAM" << std::endl;
+    std::cout << "END OF PROGRAM #3" << std::endl;
 }
