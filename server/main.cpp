@@ -9,11 +9,12 @@
 
 #define width_of_chunk 16
 #define height_of_chunk 256
-#define volume_of_chunk width_of_chunk*height_of_chunk
+#define volume_of_chunk width_of_chunk*width_of_chunk*height_of_chunk
 #define max_saved_chunk_size volume_of_chunk*sizeof(block)
 
 struct block{
-    int block;
+    u_int32_t block;
+    //int block2;
 };
 struct chunk{
     int chunk_x;
@@ -60,10 +61,11 @@ struct chunk{
 };
 class Chunk_Manager{
     private:
-        std::unordered_map<int, chunk*> mapped_chunks;
+        std::unordered_map<uint64_t, chunk*> mapped_chunks;
     public:
         void add_chunk(int x, int z, chunk* ptr){
             u_int64_t suma = static_cast<u_int64_t>(x) << 32 | z;
+            std::cout << "adding hashed_chunk: " << x << " " << z << std::endl;
             mapped_chunks[suma] = ptr;
         }
         chunk* find_chunk(int x, int z){
@@ -78,6 +80,7 @@ class Chunk_Manager{
         }
         void delete_chunk(int x, int z){
             u_int64_t suma = static_cast<u_int64_t>(x) << 32 | z;
+            std::cout << "deleting hashed_chunk: " << x << " " << z << std::endl;
             mapped_chunks.erase(suma);
         }
 };
@@ -88,7 +91,7 @@ bool file_exists(const std::string& filename){
     return (stat(filename.c_str(), &buffer) == 0);
 }
 
-chunk* create_chunk(int x, int z, Chunk_Manager hashed_chunks){
+chunk* create_chunk(int x, int z, Chunk_Manager &hashed_chunks){
     chunk *new_chunk = new chunk(x, z, hashed_chunks.find_chunk(x+1, z),  \
                                        hashed_chunks.find_chunk(x,   z+1),\
                                        hashed_chunks.find_chunk(x-1, z),  \
@@ -97,9 +100,8 @@ chunk* create_chunk(int x, int z, Chunk_Manager hashed_chunks){
     return(new_chunk);
 }
 
-chunk* load_chunk(std::string& base, int x, int z, Chunk_Manager hashed_chunks, bool end){
+chunk* load_chunk(std::string& base, int x, int z, Chunk_Manager &hashed_chunks, bool end){
     static char *loaded_file = new(std::nothrow) char[max_saved_chunk_size];
-    std::cout << "loaded_file size: " << max_saved_chunk_size << std::endl;
     if (loaded_file == nullptr){
         std::cout << "ERROR TO ALLOCATE ARRAY FOR LOADING FILE" << " in file: " << __FILE__ << ":" << __LINE__ << std::endl;
     }
@@ -133,10 +135,13 @@ chunk* load_chunk(std::string& base, int x, int z, Chunk_Manager hashed_chunks, 
 
     }
     else {
-        std::cout << "file not exists" << filename << std::endl;
-        return create_chunk(x, z, hashed_chunks);
+        std::cout << "file not exists: " << filename << std::endl;
+        chunk *new_chunk = create_chunk(x, z, hashed_chunks);
+        return new_chunk;
     }
 }
+
+
 
 int main(){
 
@@ -146,54 +151,19 @@ int main(){
     std::cout << "first random number: " << dis(gen) << std::endl;
 
     Chunk_Manager hashed_chunks;
-    chunk *loadded_chunks[10];
-    for(int i = 0; i < 10; i++){
-        loadded_chunks[i] = new chunk(i, 0, hashed_chunks.find_chunk(i+1, 0),\
-                                            hashed_chunks.find_chunk(i, 0+1),\
-                                            hashed_chunks.find_chunk(i-1, 0),\
-                                            hashed_chunks.find_chunk(i, 0-1));
-        hashed_chunks.add_chunk(i, 0, loadded_chunks[i]);
-    }
-    for (int i = 0; i < 10; i++){
-        hashed_chunks.delete_chunk(loadded_chunks[i]->chunk_x, loadded_chunks[i]->chunk_z);
-        delete loadded_chunks[i];
-    }
 
-
-    for (int i = 0; i < 10; i++){
-        break;
-        loadded_chunks[i] = new chunk(0, 0, nullptr, nullptr, nullptr, nullptr);
-    }
-    for (int i = 0; i < 10; i++){
-        break;
-        delete loadded_chunks[i];
-    }
-    //std::cout << loadded_chunk[0].x << std::endl;
-    //std::cout << loadded_chunk[0].y << std::endl;
     std::string base = "./data/";
-    chunk *test = load_chunk(base, 1, 1, hashed_chunks, 0);
-    delete test;
-    hashed_chunks.delete_chunk(1, 1);
-
-    test = load_chunk(base, 1, 1, hashed_chunks, 0);
-    delete test;
-    hashed_chunks.delete_chunk(1, 1);
-
-    test = load_chunk(base, 1, 1, hashed_chunks, 0);
-    delete test;
-    hashed_chunks.delete_chunk(1, 1);
-    std::cout << "END OF PROGRAM #5" << std::endl;
-
-
-    int test_size = 1;
+    chunk *test;
+    int test_size = 2;
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             load_chunk(base, i, y, hashed_chunks, 0);
         }
     }
+    exit(0);
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
-            delete hashed_chunks.find_chunk(i, y);
+            delete (hashed_chunks.find_chunk(i, y));
             hashed_chunks.delete_chunk(i, y);
             std::cout << "deleting chunk: " << i << " " << y << std::endl;
         }
@@ -201,7 +171,24 @@ int main(){
     if(load_chunk(base, 1, 1, hashed_chunks, 1)){
         std::cout << "ERROR WHEN CLEANING FUNCTION load_chunk " << " in file: " << __FILE__ << ":" << __LINE__ << std::endl;
     }
+    std::cout << sizeof(chunk) << " " << sizeof(chunk) * test_size / 1000000 << std::endl;
+    std::cout << "END OF PROGRAM #5" << std::endl << std::endl;
 }
 
 //clear && g++ -fwhole-program -O3 -g -fsanitize=address -fsanitize=leak main.cpp -o main && ./main && g++ ./main.cpp -g -o main && valgrind -s --leak-check=full ./main
 //clear && g++ -fwhole-program -O3 -g -fsanitize=address -fsanitize=leak main.cpp -o main && ./main && g++ ./main.cpp -g -o main && valgrind -s --leak-check=full --show-leak-kinds=all ./main
+
+//g++ ./main.cpp -O3 -fwhole-program -mavx2
+//valgrind -v -s --trace-children=yes --track-fds=all --time-stamp=yes --log-file=out.txt --error-limit=no --read-inline-info=yes --read-var-info=yes --leak-check=full --leak-resolution=high --show-leak-kinds=all --leak-check-heuristics=all --show-reachable=yes --show-possibly-lost=yes --track-origins=yes --expensive-definedness-checks=yes --malloc-fill=ee --free-fill=dd ./main
+
+
+/*
+while True:
+
+    a = [["a", ".-"], ["b", ".-"]]
+    task = random.choice(list)
+    print(task)
+    if input() == task:
+        print("correct!")
+    else:
+        print("incorrect!")*/
