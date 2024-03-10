@@ -19,42 +19,42 @@ struct block{
 struct chunk{
     int chunk_x;
     int chunk_z;
-    chunk *up;
+    chunk *chunk_z_minus;
     int up_ptr;
-    chunk *right;
+    chunk *chunk_x_plus;
     int right_ptr;
-    chunk *down;
+    chunk *chunk_z_plus;
     int down_ptr;
-    chunk *left;
+    chunk *chunk_x_minus;
     int left_ptr;
     block chunk_blocks[volume_of_chunk];
     int changes[100];
 
     chunk(){}
 
-    chunk(int chunk_x, int chunk_z, chunk* up, chunk* right, chunk* down, chunk* left) :
+    chunk(int chunk_x, int chunk_z, chunk* chunk_z_minus, chunk* chunk_x_plus, chunk* chunk_z_plus, chunk* chunk_x_minus) :
         chunk_x(chunk_x),
         chunk_z(chunk_z),
-        up(up),
-        right(right),
-        down(down),
-        left(left),
+        chunk_z_minus(chunk_z_minus),
+        chunk_x_plus(chunk_x_plus),
+        chunk_z_plus(chunk_z_plus),
+        chunk_x_minus(chunk_x_minus),
         up_ptr(0),
         right_ptr(0),
         down_ptr(0),
         left_ptr(0)
     {
-        if(up != nullptr){
-            up->down = this;
+        if(chunk_z_minus != nullptr){
+            chunk_z_minus->chunk_z_plus = this;
         }
-        if(right != nullptr){
-            right->left = this;
+        if(chunk_x_plus != nullptr){
+            chunk_x_plus->chunk_x_minus = this;
         }
-        if(down != nullptr){
-            down->up = this;
+        if(chunk_z_plus != nullptr){
+            chunk_z_plus->chunk_z_minus = this;
         }
-        if(left != nullptr){
-            left->right = this;
+        if(chunk_x_minus != nullptr){
+            chunk_x_minus->chunk_x_plus = this;
         }
         std::cout << "creation of chunk: " << chunk_x << " " << chunk_z << std::endl;
     }
@@ -92,10 +92,10 @@ bool file_exists(const std::string& filename){
 }
 
 chunk* create_chunk(int x, int z, Chunk_Manager &hashed_chunks){
-    chunk *new_chunk = new chunk(x, z, hashed_chunks.find_chunk(x+1, z),  \
-                                       hashed_chunks.find_chunk(x,   z+1),\
-                                       hashed_chunks.find_chunk(x-1, z),  \
-                                       hashed_chunks.find_chunk(x,   z-1));
+    chunk *new_chunk = new chunk(x, z, hashed_chunks.find_chunk(x,   z-1), \
+                                       hashed_chunks.find_chunk(x+1, z),   \
+                                       hashed_chunks.find_chunk(x,   z+1), \
+                                       hashed_chunks.find_chunk(x-1, z));
     hashed_chunks.add_chunk(x, z, new_chunk);
     return(new_chunk);
 }
@@ -154,13 +154,42 @@ int main(){
 
     std::string base = "./data/";
     chunk *test;
-    int test_size = 2;
+
+    int test_size = 100;
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             load_chunk(base, i, y, hashed_chunks, 0);
         }
     }
-    exit(0);
+
+    test = hashed_chunks.find_chunk(0, 0);
+    std::cout << test->chunk_z_minus << " " << test->chunk_x_plus << " " << test->chunk_z_plus << " " << test->chunk_x_minus << std::endl << std::endl;
+
+    for(int i = 0; i < test_size; i++){
+        test = hashed_chunks.find_chunk(0, i);
+        for (int y = 0; y < test_size-1; y++){
+            std::cout << test->chunk_x << test->chunk_z << " ";
+            test = test->chunk_x_plus;
+        }
+        for (int y = 0; y < test_size-1; y++){
+            std::cout << test->chunk_x << test->chunk_z << " ";
+            test = test->chunk_x_minus;
+        }
+        std::cout << test->chunk_x << test->chunk_z << std::endl;
+    }
+    std::cout << std::endl;
+    for(int i = 0; i < test_size; i++){
+        test = hashed_chunks.find_chunk(i, 0);
+        for (int y = 0; y < test_size-1; y++){
+            std::cout << test->chunk_x << test->chunk_z << " ";
+            test = test->chunk_z_plus;
+        }
+        for (int y = 0; y < test_size-1; y++){
+            std::cout << test->chunk_x << test->chunk_z << " ";
+            test = test->chunk_z_minus;
+        }
+        std::cout << test->chunk_x << test->chunk_z << std::endl;
+    }
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             delete (hashed_chunks.find_chunk(i, y));
