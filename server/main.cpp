@@ -178,7 +178,7 @@ chunk* load_chunk(std::string &base, int x, int z, Chunk_Manager &hashed_chunks,
     }
 }
 
-void unload_chunk(std::string &base, chunk* chunk, Chunk_Manager &hashed_chunks, std::atomic<uint16_t*> *active_saving_chunk_threads){
+void unload_chunk(std::string &base, chunk* chunk, Chunk_Manager &hashed_chunks, std::atomic<uint16_t> *active_saving_chunk_threads){
     std::cout << "start saving chunk: " << chunk->chunk_x << " " << chunk->chunk_z << std::endl;
     std::string filename = base + std::to_string(chunk->chunk_x) + "." + std::to_string(chunk->chunk_z) + ".chunk";
     std::ofstream file(filename, std::ios::binary);
@@ -199,16 +199,11 @@ void unload_chunk(std::string &base, chunk* chunk, Chunk_Manager &hashed_chunks,
     active_saving_chunk_threads->fetch_sub(1);
 }
 
-void fuck(std::atomic<uint16_t> *active_saving_chunk_thread){
-    active_saving_chunk_thread->fetch_sub(1);
-}
-
-
 int main(){
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, INT32_MAX);
+    std::uniform_int_distribution<> dis(0, UINT8_MAX);
     std::cout << "first random number: " << dis(gen) << std::endl;
 
     Chunk_Manager hashed_chunks;
@@ -217,7 +212,7 @@ int main(){
     chunk *test;
     std::atomic<uint16_t> active_saving_chunk_threads = 0;
 
-    int test_size = 3;
+    int test_size = 100;
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             load_chunk(base, i, y, hashed_chunks, 0);
@@ -228,7 +223,7 @@ int main(){
 
     char *chachar = reinterpret_cast<char*>(hashed_chunks.find_chunk(0, 0)->chunk_blocks);
     for(int i = 0; i < size_of_chunk; i++){
-        chachar[i] = i + 1;
+        chachar[i] = dis(gen);
     }
     //print_chunk_blocks(hashed_chunks.find_chunk(0, 0));
 
@@ -262,11 +257,9 @@ int main(){
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             active_saving_chunk_threads.fetch_add(1);
-            //std::thread saving_thread(unload_chunk, std::ref(base), hashed_chunks.find_chunk(i, y), std::ref(hashed_chunks), &active_saving_chunk_threads);
-            fuck(&active_saving_chunk_threads);
-            //std::thread saving_thread(fuck, (&active_saving_chunk_threads));
-            //saving_thread.detach();
-            //save_thread.detach();
+            std::thread saving_thread(unload_chunk, std::ref(base), hashed_chunks.find_chunk(i, y), std::ref(hashed_chunks), &active_saving_chunk_threads);
+            saving_thread.detach();
+
             continue;
             delete (hashed_chunks.find_chunk(i, y));
             hashed_chunks.delete_chunk(i, y);
@@ -278,7 +271,6 @@ int main(){
     }
     std::cout << sizeof(chunk) << " " << sizeof(chunk) * test_size / 1000000 << std::endl;
     std::cout << "END OF PROGRAM #5" << std::endl << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 //clear && g++ -fwhole-program -O3 -g -fsanitize=address -fsanitize=leak main.cpp -o main && ./main && g++ ./main.cpp -g -o main && valgrind -s --leak-check=full ./main
