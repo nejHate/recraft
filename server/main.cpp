@@ -21,17 +21,33 @@ struct block{
     //void block;
     //int block2;
 };
+
+struct inventory_box{
+    block block_type;
+    uint8_t block_count;
+};
+
+struct player{
+    uint32_t location_x;
+    uint32_t location_y;
+    inventory_box inventory[46];
+};
+
+struct chest{
+    inventory_box inventory[27];
+};
+
 struct chunk{
-    int chunk_x;
-    int chunk_z;
-    chunk *chunk_z_minus;
-    int up_ptr;
-    chunk *chunk_x_plus;
-    int right_ptr;
-    chunk *chunk_z_plus;
-    int down_ptr;
-    chunk *chunk_x_minus;
-    int left_ptr;
+    int32_t chunk_x;       // 4
+    int32_t chunk_z;       // 4
+    chunk *chunk_z_minus;  // 8
+    chunk *chunk_x_plus;   // 8
+    chunk *chunk_z_plus;   // 8
+    chunk *chunk_x_minus;  // 8
+    uint16_t up_ptr;       // 2
+    uint16_t right_ptr;    // 2
+    uint16_t down_ptr;     // 2
+    uint16_t left_ptr;     // 2
     block chunk_blocks[size_of_chunk];
     int changes[100];
 
@@ -62,6 +78,7 @@ struct chunk{
             chunk_x_minus->chunk_x_plus = this;
         }
         std::cout << "creation of chunk: " << chunk_x << " " << chunk_z << std::endl;
+        std::cout << "sizeof pointer: " << sizeof(chunk*) << std::endl;
     }
     /*~chunk(){
         if (chunk_z_minus != nullptr){
@@ -105,6 +122,24 @@ class Chunk_Manager{
         }
 };
 
+void delete_folder(const std::string& folderPath) {
+    try {
+        // Iterate over all files in the directory
+        for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+            // Check if it's a regular file
+            if (std::filesystem::is_regular_file(entry.path())) {
+                // Delete the file
+                std::filesystem::remove(entry.path());
+                std::cout << "Deleted file: " << entry.path() << std::endl;
+            }
+        }
+        std::cout << "All files in folder \"" << folderPath << "\" deleted successfully." << std::endl;
+    } catch (const std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
+    }
+}
+
+//slower
 uint32_t get_rand_uint32_t2(){
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -232,6 +267,8 @@ int main(){
     std::uniform_int_distribution<uint32_t> dis(0, UINT32_MAX);
     std::cout << "first random number: " << dis(gen) << std::endl;
 
+    delete_folder("./data");
+
     Chunk_Manager hashed_chunks;
 
     std::string base = "./data/";
@@ -239,7 +276,7 @@ int main(){
     std::atomic<uint16_t> active_saving_chunk_threads = 0;
 
     auto time1 = std::chrono::system_clock::now();
-    int test_size = 100;
+    int test_size = 10;
     for(int i = 0; i < test_size; i++){
         for(int y = 0; y < test_size; y++){
             test = load_chunk(base, i, y, hashed_chunks, 0);
@@ -275,7 +312,7 @@ int main(){
     if(load_chunk(base, 1, 1, hashed_chunks, 1)){
         std::cout << "ERROR WHEN CLEANING FUNCTION load_chunk " << " in file: " << __FILE__ << ":" << __LINE__ << std::endl;
     }
-    std::cout << sizeof(chunk) << " " << sizeof(chunk) * test_size / 1000000 << std::endl;
+    std::cout << sizeof(chunk) << " " << sizeof(struct block) << std::endl;
     std::cout << "END OF PROGRAM #5" << std::endl << std::endl;
     std::cout.rdbuf(old);
     std::cout << stdout_buffer.str();
