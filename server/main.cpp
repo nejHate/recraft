@@ -139,7 +139,7 @@ void delete_folder(const std::string& folderPath) {
     }
 }
 
-//slower
+//slower -> 24s vs 16s
 uint32_t get_rand_uint32_t2(){
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -148,11 +148,11 @@ uint32_t get_rand_uint32_t2(){
     return number;
 }
 
-//faster way -> 16s vs 24s
+//faster -> 16s vs 24s
 uint32_t get_rand_uint32_t() {
     // Seed the random number generator with current time
     static uint8_t test = 0;
-    if(test != 0){
+    if(test == 0){
         std::srand(static_cast<uint32_t>(std::time(nullptr)));
         test++;
     }
@@ -313,6 +313,12 @@ int main(){
         std::cout << "ERROR WHEN CLEANING FUNCTION load_chunk " << " in file: " << __FILE__ << ":" << __LINE__ << std::endl;
     }
     std::cout << sizeof(chunk) << " " << sizeof(struct block) << std::endl;
+    auto random = get_rand_uint32_t();
+    if(random % 2){
+        // just to delete data  so I can push it to git
+        delete_folder("./data");
+        std::cout << "deleting all files in ./data " << random % 2 << " " << random << std::endl;
+    }
     std::cout << "END OF PROGRAM #5" << std::endl << std::endl;
     std::cout.rdbuf(old);
     std::cout << stdout_buffer.str();
