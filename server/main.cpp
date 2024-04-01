@@ -30,6 +30,7 @@ struct inventory_box{
 struct player{
     uint32_t location_x;
     uint32_t location_y;
+    uint32_t location_z;
     inventory_box inventory[46];
 };
 
@@ -316,6 +317,7 @@ int main(){
     auto random = get_rand_uint32_t();
     if(random % 2){
         // just to delete data  so I can push it to git
+        // don't ask why xd
         delete_folder("./data");
         std::cout << "deleting all files in ./data " << random % 2 << " " << random << std::endl;
     }
